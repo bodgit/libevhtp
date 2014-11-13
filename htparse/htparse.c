@@ -194,6 +194,9 @@ static const char * method_strmap[] = {
     "TRACE",
     "CONNECT",
     "PATCH",
+    "NOTIFY",
+    "SUBSCRIBE",
+    "UNSUBSCRIBE",
 };
 
 #define _MIN_READ(a, b) ((a) < (b) ? (a) : (b))
@@ -260,6 +263,11 @@ static const char * method_strmap[] = {
     && m[4] == c4 && m[5] == c5 && m[6] == c6 && m[7] == c7 && m[8] == c8
 
 #endif
+
+#define _str11cmp(m, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11)  \
+    *(uint32_t *)m == ((c3 << 24) | (c2 << 16) | (c1 << 8) | c0)        \
+    && ((uint32_t *)m)[1] == ((c7 << 24) | (c6 << 16) | (c5 << 8) | c4) \
+    && ((uint32_t *)m)[2] == ((c11 << 24) | (c10 << 16) | (c9 << 8) | c8)
 
 #define __HTPARSE_GENHOOK(__n)                                                    \
     static inline int hook_ ## __n ## _run(htparser * p, htparse_hooks * hooks) { \
@@ -645,6 +653,11 @@ htparser_run(htparser * p, htparse_hooks * hooks, const char * data, size_t len)
                                 p->method = htp_method_UNLOCK;
                                 break;
                             }
+
+                            if (_str6cmp(m, 'N', 'O', 'T', 'I', 'F', 'Y')) {
+                                p->method = htp_method_NOTIFY;
+                                break;
+                            }
                             break;
                         case 7:
                             if (_str7_cmp(m, 'O', 'P', 'T', 'I', 'O', 'N', 'S', '\0')) {
@@ -666,6 +679,17 @@ htparser_run(htparser * p, htparse_hooks * hooks, const char * data, size_t len)
                             if (_str9cmp(m, 'P', 'R', 'O', 'P', 'P', 'A', 'T', 'C', 'H')) {
                                 p->method = htp_method_PROPPATCH;
                             }
+
+                            if (_str9cmp(m, 'S', 'U', 'B', 'S', 'C', 'R', 'I', 'B', 'E')) {
+                                p->method = htp_method_SUBSCRIBE;
+                            }
+
+                            break;
+                        case 11:
+                            if (_str11cmp(m, 'U', 'N', 'S', 'U', 'B', 'S', 'C', 'R', 'I', 'B', 'E', '\0')) {
+                                p->method = htp_method_UNSUBSCRIBE;
+                            }
+
                             break;
                     } /* switch */
 

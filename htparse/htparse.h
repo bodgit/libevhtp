@@ -34,6 +34,9 @@ enum htp_method {
     htp_method_TRACE,
     htp_method_CONNECT, /* RFC 2616 */
     htp_method_PATCH,   /* RFC 5789 */
+    htp_method_NOTIFY,
+    htp_method_SUBSCRIBE,
+    htp_method_UNSUBSCRIBE,
     htp_method_UNKNOWN,
 };
 
